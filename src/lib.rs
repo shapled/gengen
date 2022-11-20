@@ -1,5 +1,7 @@
 mod tokenizer;
 mod parser;
+mod grammar;
+mod bootstrap;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right

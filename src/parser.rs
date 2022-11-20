@@ -2,8 +2,8 @@ use std::marker::PhantomData;
 
 use crate::tokenizer::Tokenizer;
 
-#[derive(Debug, PartialEq)]
-struct Node<K> {
+#[derive(PartialEq, Debug)]
+pub struct Node<K> {
     kind: K,
     children: Vec<Node<K>>,
 }
@@ -17,9 +17,10 @@ impl<K> Node<K> {
     }
 }
 
-struct Parser<K, T, G>
+#[derive(Debug)]
+pub struct Parser<K, T, G>
 where
-    T: Copy + Eq,
+    T: Copy + PartialEq,
     G: Iterator<Item = T>
 {
     tokenizer: Tokenizer<T, G>,
@@ -28,7 +29,7 @@ where
 
 impl<K, T, G> Parser<K, T, G>
 where
-    T: Copy + Eq,
+    T: Copy + PartialEq,
     G: Iterator<Item = T>
 {
     fn new(tokenizer: Tokenizer<T, G>) -> Self {
@@ -103,6 +104,7 @@ mod test {
 
     use super::*;
 
+    #[derive(Debug)]
     struct Input {
         data: Vec<&'static str>,
         pos: usize,

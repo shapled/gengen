@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Tokenizer<T, G> 
 where
     T: Copy + PartialEq,
@@ -56,6 +57,7 @@ mod test {
 
     use super::*;
 
+    #[derive(Debug)]
     struct Input<'a> {
         data: Vec<&'a str>,
         pos: usize,
