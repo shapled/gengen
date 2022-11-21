@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use std::{marker::PhantomData, borrow::Borrow};
 
 use crate::tokenizer::Tokenizer;
 
@@ -17,45 +17,49 @@ impl<K> Node<K> {
     }
 }
 
+pub trait TokenExpected<T> {
+    fn matched(&self, token: &T) -> bool;
+}
+
 #[derive(Debug)]
 pub struct Parser<K, T, G>
 where
-    T: Copy + PartialEq,
+    T: Copy,
     G: Iterator<Item = T>
 {
-    tokenizer: Tokenizer<T, G>,
+    pub tokenizer: Tokenizer<T, G>,
     _phantom: PhantomData<K>,
 }
 
 impl<K, T, G> Parser<K, T, G>
 where
-    T: Copy + PartialEq,
+    T: Copy,
     G: Iterator<Item = T>
 {
-    fn new(tokenizer: Tokenizer<T, G>) -> Self {
+    pub fn new(tokenizer: Tokenizer<T, G>) -> Self {
         Self {
             tokenizer,
             _phantom: PhantomData,
         }
     }
 
-    fn mark(&self) -> usize {
+    pub fn mark(&self) -> usize {
         self.tokenizer.mark()
     }
 
-    fn reset(&mut self, pos: usize) {
+    pub fn reset(&mut self, pos: usize) {
         self.tokenizer.reset(pos);
     }
 
-    fn expect(&mut self, token: &T) -> Option<T> {
+    pub fn expect<TE: TokenExpected<T>>(&mut self, expected: TE) -> Option<T> {
         let next = self.tokenizer.peek_token();
         match next {
-            Some(t) if t.eq(token)  => self.tokenizer.get_token(),
+            Some(t) if expected.matched(&t) => self.tokenizer.get_token(),
             _ => None,
         }
     }
 
-    fn repeat<F>(
+    pub fn repeat<F>(
         &mut self, 
         at_least: usize, 
         at_most: Option<usize>, 
@@ -83,7 +87,7 @@ where
         None
     }
 
-    fn lookahead<F>(
+    pub fn lookahead<F>(
         &mut self, 
         positive: bool, 
         callback: &F
@@ -135,6 +139,12 @@ mod test {
         }
     }
 
+    impl<'a> TokenExpected<&'a str> for &'a str {
+        fn matched(&self, token: &&'a str) -> bool {
+            self.eq(token)
+        }
+    }
+
     #[test]
     fn test_tokenizer() {
         let tokengen = Input::new("你abc好");
@@ -142,14 +152,14 @@ mod test {
         let mut parser: Parser<&'static str, _, _> = Parser::new(tokenizer);
 
         assert_eq!(0, parser.mark());
-        assert_eq!(None, parser.expect(&"a"));
-        assert_eq!(Some("你"), parser.expect(&"你"));
+        assert_eq!(None, parser.expect("a"));
+        assert_eq!(Some("你"), parser.expect("你"));
         assert_eq!(1, parser.mark());
     
         let next_is_a_or_b_or_c = | p: &mut Parser<&'static str, &'static str, Input> | { 
-            if p.expect(&"a").is_some()
-               || p.expect(&"b").is_some()
-               || p.expect(&"c").is_some() {
+            if p.expect("a").is_some()
+               || p.expect("b").is_some()
+               || p.expect("c").is_some() {
                 Some(Node::new("abc"))
             } else {
                 None

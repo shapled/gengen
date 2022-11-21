@@ -1,32 +1,32 @@
 #[derive(PartialEq, Debug)]
 pub struct Rule<'a> {
-    name: &'a str,
-    alts: Vec<Alt<'a>>,
+    pub name: &'a str,
+    pub alts: Vec<Alt<'a>>,
 }
 
 #[derive(PartialEq, Debug)]
 pub struct Alt<'a> {
-    items: Vec<Item<'a>>,
-    action: &'a str,
+    pub items: Vec<Item<'a>>,
+    pub action: String,
 }
 
 #[derive(PartialEq, Debug)]
 pub struct NamedItem<'a>{
-    name: &'a str, 
-    item: &'a str,
+    pub name: &'a str, 
+    pub item: &'a str,
 }
 
 #[derive(PartialEq, Debug)]
 pub struct Repeat<'a>{
-    at_least: usize, 
-    at_most: Option<usize>, 
-    item: &'a str,
+    pub at_least: usize, 
+    pub at_most: Option<usize>, 
+    pub item: &'a str,
 }
 
 #[derive(PartialEq, Debug)]
 pub struct Lookahead<'a>{
-    positive: bool, 
-    item: &'a str,
+    pub positive: bool, 
+    pub item: &'a str,
 }
 
 #[derive(PartialEq, Debug)]
@@ -35,14 +35,24 @@ pub enum Item<'a> {
     Repeat(Repeat<'a>),
     Lookahead(Lookahead<'a>),
     Cut,
-}
-
-#[derive(PartialEq, Debug)]
-pub struct Action<'a> {
-    action: &'a str
+    Raw(&'a str),
 }
 
 #[derive(PartialEq, Debug)]
 pub struct Grammar<'a> {
-    rules: Vec<Rule<'a>>
+    pub rules: Vec<Rule<'a>>,
+    pub metas: Vec<Meta<'a>>,
+}
+
+#[derive(PartialEq, Debug)]
+pub enum MetaValue<'a> {
+    None,
+    Number(f64),
+    String(&'a str),
+}
+
+#[derive(PartialEq, Debug)]
+pub struct Meta<'a> {
+    pub key: &'a str, 
+    pub value: MetaValue<'a>,
 }

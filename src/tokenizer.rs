@@ -1,7 +1,7 @@
 #[derive(Debug)]
 pub struct Tokenizer<T, G> 
 where
-    T: Copy + PartialEq,
+    T: Copy,
     G: Iterator<Item = T>
 {
     tokengen: G,
@@ -11,7 +11,7 @@ where
 
 impl<T, G> Tokenizer<T, G> 
 where
-    T: Copy + PartialEq,
+    T: Copy,
     G: Iterator<Item = T>
 {
     pub fn new(tokengen: G) -> Self {
